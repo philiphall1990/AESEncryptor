@@ -1,11 +1,11 @@
 __author__ = 'admin'
-import io
+import io as io
 import numpy as np
 import binascii
 import re
+import os as os
 
-
-class NewCrypto():
+class Encrypt():
     INPUT_BLOCK_SIZE = 128
     KEY_SIZE = 256
     Nb = INPUT_BLOCK_SIZE / 32
@@ -69,36 +69,52 @@ class NewCrypto():
     def encrypt(self, inputfile, key):
         output = []
         keyschedule = self.keyExpansion(key)
-        iv = np.array(np.random.random_integers(0, 1, self.INPUT_BLOCK_SIZE)).reshape(4,32)  # randomly generate bits of equal size to block size
-
-         # creaste Reader to read input file to be encrypted
-        with open(inputfile,mode='rb') as f:
+        iv = np.array(np.random.random_integers(0, 1, self.INPUT_BLOCK_SIZE)).reshape(16,8)  # randomly generate bits of equal size to block size
+        priorstate = iv
+        with io.open(inputfile,mode='rb') as f:
                 byte = []
                 try:
                     for i in range(0,16):
                         byte.append(f.read(1))
                     while byte[15]:
-                        state = []
-                        block = []
-                        for i in range(0,16):
-                            block.append(binascii.hexlify(byte[i]).decode())
-                            if (i+1) % 4 == 0:
-                                state.append(block)
-                                block = []
-
+                        state = self.decodeandBlockChain(byte,priorstate)
                         output.append(self.round(state,keyschedule))
                         try:
                             byte = []
                             for i in range(0,16):
                                 byte.append(f.read(1))
-                        finally:
-                            x = None
 
+                            priorstate = np.asarray(state).reshape(16,8)
+                        except Exception as e:
+                            print("Error: {1}".format(e))
+                        finally:
+                            f.close()
+                except Exception as e:
+                    print("Error: {1}".format(e))
                 finally:
                     f.close()
 
-        print(output)
+        path = input("Please select file path for encrypted file:\n")
+        while os.path.exists(path):
+            path = input("Sorry, this file already exists, please choose a unique file path:\n")
+        with io.open(path,mode='ab') as f:
+           for i in iv:
+                   f.write(bytearray(int(self.bitArrayToBytes(i),16)))
+           for i in output:
+               for x in i:
+                   f.write(bytearray(int(x,16)))
 
+
+
+    def decodeandBlockChain(self, byteArray, priorstate):
+        block = []
+        state = []
+        for i in range(0,16):
+            block.append(binascii.hexlify(byteArray[i]).decode())
+            block[i] = self.bitArrayToBytes(self.byteXOR(self.bytesToBits(block[i]),priorstate[i]))
+            if (i+1) % 4 == 0:
+                state.append([block[i-3],block[i-2],block[i-1],block[i]])
+        return state
 
     def round(self,state, keyschedule):
             for i in range(0,len(state)):
