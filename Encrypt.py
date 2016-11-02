@@ -164,34 +164,52 @@ class Encrypt():
 
     def shiftRows(self, state):
 
-        for i in range(0,4):
-            for n in range (0,4):
+        def invShiftRows(self, state):
+            for i in range(0, 4):
+                tempstate = []
+                othertempstate = []
                 if i > 0:
-                    tempstate = state[i][(n+4-i)%4]
-                    state[i][(n+4-i)%4] = state[i][n]
-                    state[i][n] = tempstate
+                    x = 0
+                    n = 0
+                    y = 0
+                    for x in range(0, i):
+                        tempstate.append(state[i][x])
+                    for x in range(i, 4):
+                        othertempstate.append(state[i][x])
+                    for n in range(0, len(othertempstate)):
+                        state[i][n] = othertempstate[n]
+                    for y in range(n + 1, 4):
+                        state[i][y] = tempstate[y - len(othertempstate)]
 
-        return state
-
+            return state
 
     def mixColumns(self, state):
-        for i in range(0,4):
-            for n in range(0,4):
+        for i in range(0, 4):
+            for n in range(0, 4):
                 tempbits = self.bytesToBits(state[n][i])
                 if i == 0:
                     if n == 0:
-                        tempshiftedbits= self.timesTwo(tempbits)
+                        tempbits = self.timesTwo(tempbits)
                     elif n == 1:
-                        tempshiftedbits= self.timesThree(tempbits)
+                        tempbits = self.timesThree(tempbits)
                 if i == 1:
+                    if n == 1:
+                        tempbits = self.timesTwo(tempbits)
+                    elif n == 2:
+                        tempbits = self.timesThree(tempbits)
+                if i == 2:
+                    if n == 2:
+                        tempbits = self.timesTwo(tempbits)
+                    if n == 3:
+                        tempbits = self.timesThree(tempbits)
+                if i == 3:
                     if n == 0:
-                        tempshiftedbits = self.timesThree(tempbits)
-                    elif  n == 1:
-                        tempshiftedbits = self.timesTwo(tempbits)
-                state[n][i] =  tempshiftedbits
+                        tempbits = self.timesThree(tempbits)
+                    if n == 3:
+                        tempbits = self.timesTwo(tempbits)
+                state[n][i] = tempbits
 
         return state
-
 
 
     def timesThree(self, byte):
