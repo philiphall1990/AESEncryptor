@@ -30,7 +30,6 @@ class Encrypt():
                             byte = []
                             for i in range(0,16):
                                 byte.append(f.read(1))
-
                             priorstate = np.asarray(state).reshape(16,8)
                         except Exception as e:
                             print("Error: {1}".format(e))

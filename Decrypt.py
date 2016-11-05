@@ -1,37 +1,60 @@
 import Utility as u
 import KeyExp as KE
 import io
+import binascii
+import numpy as np
 class Decrypt():
 
     def decrypt(self,inputFile, key):
-        key = KE.keyExpansion(key)
-        state = inputFile
+        output = []
+        keyschedule = KE.keyExpansion(key)
+        with io.open(inputFile, mode='rb') as f:
+            self.byte = []
+            self.block = []
+            self.state = []
+            self.priorstate = []
+            self.decodeandBlockChain(f)
+            while self.byte[32]:
+                self.byte = []
+                self.block = []
+                decryptedstate = self.round(self.state, keyschedule)
+                for i in range(0, 16):
+                    decryptedstate[i] = u.bitArrayToBytes(u.byteXOR(u.bytesToBits(decryptedstate[i]), u.bytesToBits(self.priorstate[i])))
+                output.append(decryptedstate)
+                self.priorstate = self.state
+                self.decodeandBlockChain(f)
+        return output
+
+
+
+    def decodeandBlockChain(self,f):
+        try:
+            for i in range(0, 32):
+                self.byte.append(f.read(1))
+                self.block.append(binascii.hexlify(self.byte[i]).decode())
+                if i < 16 and (i + 1) % 4 == 0:
+                    self.priorstate.append([self.block[i - 3], self.block[i - 2], self.block[i - 1], self.block[i]])
+
+                if i >= 16 and (i + 1) % 4 == 0:
+                    self.state.append([self.block[i - 3], self.block[i - 2], self.block[i - 1], self.block[i]])
+        except Exception as e:
+            print("Error: {1}".format(e))
+        finally:
+            f.close()
+
+
+    def round(self, state, keyschedule):
         for i in range(0,4):
             for x in range(0,4):
                 state[i][x] = u.INVSBOX[int(state[i][x],16)]
-        with io.open(inputFile, mode='rb') as f:
-            byte = []
-            try:
-                for i in range(0,16):
-                    byte.append(f.read(1))
-                while byte[15]:
-
-                    try:
-                      for i in range(0,16):
-                          byte.append(f.read(1))
-                    except Exception as e:
-                        print("Error: {1}".format(e))
-                    finally:
-                        f.close()
-            except Exception as e:
-                print("Error: {1}".format(e))
-            finally:
-                f.close()
-
-        state = self.invShiftRows(state)
-        state = self.invMixColumns(state)
-        return state
-
+            state = self.invShiftRows(state)
+            state = self.invMixColumns(state)
+            state = np.asarray(state).reshape(16, 8)
+        finalstate = []
+        for i in range(0, len(state)):
+            temp = u.byteXOR(state[i],u.bytesToBits(keyschedule[i]))
+            finalstate.append(u.bitArrayToBytes(temp))
+        return finalstate
 
     def invShiftRows(self,state):
         for i in range(0, 4):
