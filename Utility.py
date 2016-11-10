@@ -1,34 +1,34 @@
-def byteXOR(byte1, byte2):
+def byteXOR(byte1, byte2):                              # Return the result of an Exclusive OR of two one-byte bit arrays.
     output = []
-    if len(byte1) < 8:
+    if len(byte1) < 8:                                  # Ensure byte is correct length: if first byte is missing leading 0s, at 0s.
         byte1 = ['0' + byte1]
-    if len(byte2) < 8:
+    if len(byte2) < 8:                                  # Same for second byte.
         byte2 = '0' + byte2
-    for i in range(0, len(byte1), 1):
+    for i in range(0, len(byte1), 1):                   # For each bit in the strings, the output bit is the XOR of input bits.
         output.append(byte1[i] ^ byte2[i])
-    return output
+    return output 
 
-def bitArrayToBytes(bits):
+def bitArrayToBytes(bits):                              # Convert a byte in the form of an 8-bit array to a hexadecimal-form byte string.
     string = ''
-    for x in bits:
+    for x in bits:                                      # Add each element of the array to a string, creating bit string.
         string += str(int(x))
     return hex(int(string, 2))
 
-def bitStringtoBytes(bits):
+def bitStringtoBytes(bits):                             # Convert a byte in the form of a string of bits to a hexadecimal-form byte string.
     return hex(int(bits.replace('0b',''),2))
 
-def bytesToBits(bytes):
+def bytesToBits(bytes):                                 # Convert a hexadecimal-form byte or raw byte to a bitarray.
     intarray = []
-    string = bin(int(str(bytes), 16)).replace('0b','')
-    for i in string:
+    string = bin(int(str(bytes), 16)).replace('0b','')  # Convert byte to binary bit string.
+    for i in string:                                    # Append each character of th string to an array.
         intarray.append(int(i))
-    while len(intarray) < 8:
+    while len(intarray) < 8:                            # Add leading 0s to normalise all bytes to 8-bit string.
         intarray.insert(0,0)
-    while len(intarray) > 8:
+    while len(intarray) > 8:                            #remove any leading 0s beyond the 8-bit desired length;
         intarray.pop()
     return intarray
 
-#------Constants----
+#------CONSTANTS----
 
 RCON = (0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36)
 
