@@ -21,8 +21,10 @@ class Decrypt():
                 for i in range(0, 16):
                     decryptedstate[i] = u.bitArrayToBytes(u.byteXOR(u.bytesToBits(decryptedstate[i]), u.bytesToBits(self.priorstate[i])))
                 output.append(decryptedstate)
-                self.priorstate = self.state
+                self.priorstate = decryptedstate
+                self.state = []
                 self.decodeandBlockChain(f)
+
         return output
 
 
@@ -30,18 +32,22 @@ class Decrypt():
     def decodeandBlockChain(self,f):
         try:
             for i in range(0, 32):
-                self.byte.append(f.read(1))
-                self.block.append(binascii.hexlify(
-                    self.byte[i]).decode())
-                if i < 16:
+                try:
+                    self.byte.append(f.read(1))
+                except:
+                    print("Reached File End")
+                if len(self.byte) < i + 1:
+                    self.block.append('0x00')
+                else:
+                    self.block.append(binascii.hexlify(self.byte[i]).decode())
+                if i < 16 and len(self.priorstate) < 16:
                     self.priorstate.append(self.block[i])
 
                 if i >= 16 and (i + 1) % 4 == 0:
                     self.state.append([self.block[i - 3], self.block[i - 2], self.block[i - 1], self.block[i]])
         except Exception as e:
             print("Error: {1}".format(e))
-        finally:
-            f.close()
+
 
 
     def round(self, state, keyschedule):
