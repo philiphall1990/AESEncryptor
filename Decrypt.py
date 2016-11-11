@@ -14,7 +14,7 @@ class Decrypt():
             self.state = []
             self.priorstate = []
             self.decodeandBlockChain(f)
-            while self.byte[32]:
+            while self.byte[31]:
                 self.byte = []
                 self.block = []
                 decryptedstate = self.round(self.state, keyschedule)
@@ -31,9 +31,10 @@ class Decrypt():
         try:
             for i in range(0, 32):
                 self.byte.append(f.read(1))
-                self.block.append(binascii.hexlify(self.byte[i]).decode())
-                if i < 16 and (i + 1) % 4 == 0:
-                    self.priorstate.append([self.block[i - 3], self.block[i - 2], self.block[i - 1], self.block[i]])
+                self.block.append(binascii.hexlify(
+                    self.byte[i]).decode())
+                if i < 16:
+                    self.priorstate.append(self.block[i])
 
                 if i >= 16 and (i + 1) % 4 == 0:
                     self.state.append([self.block[i - 3], self.block[i - 2], self.block[i - 1], self.block[i]])
@@ -46,10 +47,11 @@ class Decrypt():
     def round(self, state, keyschedule):
         for i in range(0,4):
             for x in range(0,4):
-                state[i][x] = u.INVSBOX[int(state[i][x],16)]
-            state = self.invShiftRows(state)
-            state = self.invMixColumns(state)
-            state = np.asarray(state).reshape(16, 8)
+                state[i][x] = hex(u.INVSBOX[int(state[i][x],16)])
+        state = self.invShiftRows(state)
+        state = self.invMixColumns(state)
+
+        state = np.asarray(state).reshape(16, 8)
         finalstate = []
         for i in range(0, len(state)):
             temp = u.byteXOR(state[i],u.bytesToBits(keyschedule[i]))
@@ -76,42 +78,42 @@ class Decrypt():
     def invMixColumns(self, state):
         for i in range(0,4):
             for n in range(0,4):
-                tempbits = u.bytesToBits(state[n][i])
+                tempbits = int(str(state[n][i]), 16)
                 if i == 0:
                     if n == 0:
-                        tempbits= u.TIMES14[int(tempbits,16)]
+                        tempbits= u.TIMES14[int(tempbits)]
                     elif n == 1:
-                        tempbits= u.TIMES11[int(tempbits,16)]
+                        tempbits= u.TIMES11[int(tempbits)]
                     elif n == 2:
-                        tempbits = u.TIMES13[int(tempbits,16)]
+                        tempbits = u.TIMES13[int(tempbits)]
                     elif n ==3:
-                        tempbits = u.TIMES9[int(tempbits,16)]
+                        tempbits = u.TIMES9[int(tempbits)]
                 if i == 1:
                     if n == 0:
-                        tempbits= u.TIMES9[int(tempbits,16)]
+                        tempbits= u.TIMES9[int(tempbits)]
                     elif n == 1:
-                        tempbits= u.TIMES14[int(tempbits,16)]
+                        tempbits= u.TIMES14[int(tempbits)]
                     elif n == 2:
-                        tempbits = u.TIMES11[int(tempbits,16)]
+                        tempbits = u.TIMES11[int(tempbits)]
                     elif n ==3:
-                        tempbits = u.TIMES13[int(tempbits,16)]
+                        tempbits = u.TIMES13[int(tempbits)]
                 if i == 2:
                     if n == 0:
-                        tempbits= u.TIMES13[int(tempbits,16)]
+                        tempbits= u.TIMES13[int(tempbits)]
                     elif n == 1:
-                        tempbits= u.TIMES9[int(tempbits,16)]
+                        tempbits= u.TIMES9[int(tempbits)]
                     elif n == 2:
-                        tempbits = u.TIMES14[int(tempbits,16)]
+                        tempbits = u.TIMES14[int(tempbits)]
                     elif n ==3:
-                        tempbits = u.TIMES11[int(tempbits,16)]
+                        tempbits = u.TIMES11[int(tempbits)]
                 if i == 3:
                     if n == 0:
-                        tempbits= u.TIMES11[int(tempbits,16)]
+                        tempbits= u.TIMES11[int(tempbits)]
                     elif n == 1:
-                        tempbits= u.TIMES13[int(tempbits,16)]
+                        tempbits= u.TIMES13[int(tempbits)]
                     elif n == 2:
-                        tempbits = u.TIMES9[int(tempbits,16)]
+                        tempbits = u.TIMES9[int(tempbits)]
                     elif n ==3:
-                        tempbits = u.TIMES14[int(tempbits,16)]
-                state[n][i] =  tempbits
+                        tempbits = u.TIMES14[int(tempbits)]
+                state[n][i] =  u.bytesToBits(hex(tempbits))
         return state
