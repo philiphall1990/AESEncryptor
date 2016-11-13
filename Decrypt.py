@@ -5,22 +5,24 @@ import binascii
 import numpy as np
 class Decrypt():
 
-    def decrypt(self,inputFile, key):
+    def decrypt(self,inputFile, key):                                               # Do decrypt logic on each block.
         output = []
-        keyschedule = KE.keyExpansion(key)
-        with io.open(inputFile, mode='rb') as f:
-            self.byte = []
+        keyschedule = KE.keyExpansion(key)                                          # Do Key Expansion to derive full key schedule from key.
+        with io.open(inputFile, mode='rb') as f:                                    # Open file to be decrypted.
+            self.byte = []                                                          # Instantiate variables.
             self.block = []
             self.state = []
             self.priorstate = []
-            self.decodeandBlockChain(f)
-            while self.byte[31]:
-                self.byte = []
+            self.decodeandBlockChain(f)                                             # Decode file to hex, and retrieve IV or prior state.
+            while self.byte[31]:                                                    # While byte has 32 elements (a single state) (Maybe should be while state is 32 elements?)
+                self.byte = []  
                 self.block = []
-                decryptedstate = self.round(self.state, keyschedule)
-                for i in range(0, 16):
-                    decryptedstate[i] = u.bitArrayToBytes(u.byteXOR(u.bytesToBits(decryptedstate[i]), u.bytesToBits(self.priorstate[i])))
-                output.append(decryptedstate)
+                decryptedstate = self.round(self.state, keyschedule)                # The (semi) decrypted state is the product of a single round.
+                for i in range(0, 16):                                              
+                    decryptedstate[i] = u.bitArrayToBytes(                          # For each element the (final) decrypted state is the XOR of the state element and the prior state element at the same position.
+                        u.byteXOR(u.bytesToBits(decryptedstate[i]), 
+                                  u.bytesToBits(self.priorstate[i])))
+                output.append(decryptedstate)                                       # Append the final output with this state as decrypted.
                 self.priorstate = decryptedstate
                 self.state = []
                 self.decodeandBlockChain(f)
