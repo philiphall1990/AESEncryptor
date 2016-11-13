@@ -51,12 +51,11 @@ class Decrypt():
 
 
     def round(self, state, keyschedule):
+        state = self.invMixColumns(state)
+        state = self.invShiftRows(state)
         for i in range(0,4):
             for x in range(0,4):
                 state[i][x] = hex(u.INVSBOX[int(state[i][x],16)])
-        state = self.invShiftRows(state)
-        state = self.invMixColumns(state)
-
         state = np.asarray(state).reshape(16, 8)
         finalstate = []
         for i in range(0, len(state)):
@@ -84,42 +83,46 @@ class Decrypt():
     def invMixColumns(self, state):
         for i in range(0,4):
             for n in range(0,4):
-                tempbits = int(str(state[n][i]), 16)
+                tempbits = u.bytesToBits(state[i][n])
+                tempbitsx2 = u.timesTwo(tempbits)
+                tempbitsx4 = u.timesTwo(tempbitsx2)
+                tempbitsx8 = u.timesTwo(tempbitsx4)
                 if i == 0:
                     if n == 0:
-                        tempbits= u.TIMES14[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4),tempbitsx2)
                     elif n == 1:
-                        tempbits= u.TIMES11[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbitsx2)
                     elif n == 2:
-                        tempbits = u.TIMES13[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4),tempbits)
                     elif n ==3:
-                        tempbits = u.TIMES9[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbits)
                 if i == 1:
                     if n == 0:
-                        tempbits= u.TIMES9[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbits)
                     elif n == 1:
-                        tempbits= u.TIMES14[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbitsx2)
                     elif n == 2:
-                        tempbits = u.TIMES11[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbitsx2)
                     elif n ==3:
-                        tempbits = u.TIMES13[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbits)
                 if i == 2:
                     if n == 0:
-                        tempbits= u.TIMES13[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbits)
                     elif n == 1:
-                        tempbits= u.TIMES9[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbits)
                     elif n == 2:
-                        tempbits = u.TIMES14[int(tempbits)]
-                    elif n ==3:
-                        tempbits = u.TIMES11[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbitsx2)
+                    elif n == 3:
+                        tempbits = u.byteXOR(tempbitsx8, tempbitsx2)
                 if i == 3:
                     if n == 0:
-                        tempbits= u.TIMES11[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbitsx2)
                     elif n == 1:
-                        tempbits= u.TIMES13[int(tempbits)]
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbits)
                     elif n == 2:
-                        tempbits = u.TIMES9[int(tempbits)]
+                        tempbits = u.byteXOR(tempbitsx8, tempbits)
                     elif n ==3:
-                        tempbits = u.TIMES14[int(tempbits)]
-                state[n][i] =  u.bytesToBits(hex(tempbits))
+                        tempbits = u.byteXOR(u.byteXOR(tempbitsx8, tempbitsx4), tempbitsx2)
+
+                state[i][n] =  u.bitArrayToBytes(tempbits)
         return state
