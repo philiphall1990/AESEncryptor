@@ -28,6 +28,24 @@ def bytesToBits(bytes):                                 # Convert a hexadecimal-
         intarray.pop()
     return intarray
 
+
+def timesThree(byte):
+    return bytesToBits(
+        THREEXTABLE[int(str(byte).replace('[', '').replace(']', '').replace(',', '').replace(' ', ''), 2)])
+
+
+def timesTwo(bits):
+    for i in range(0, 7):
+        if bits[0] == 1:
+            bits[i] = bits[i + 1]
+            bits[7] = 0
+            bits = u.byteXOR(bits, [0, 0, 0, 1, 1, 0, 1, 1])
+        else:
+            bits[i] = bits[i + 1]
+            bits[7] = 0
+    return bits
+
+
 #------CONSTANTS----
 
 RCON = (0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36)

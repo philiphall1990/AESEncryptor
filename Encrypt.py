@@ -96,37 +96,23 @@ class Encrypt():
                 tempbits = u.bytesToBits(state[n][i])
                 if i == 0:
                     if n == 0:
-                        tempbits = self.timesTwo(tempbits)
+                        tempbits = u.timesTwo(tempbits)
                     elif n == 1:
-                        tempbits = self.timesThree(tempbits)
+                        tempbits = u.timesThree(tempbits)
                 if i == 1:
                     if n == 1:
-                        tempbits = self.timesTwo(tempbits)
+                        tempbits = u.timesTwo(tempbits)
                     elif n == 2:
-                        tempbits = self.timesThree(tempbits)
+                        tempbits = u.timesThree(tempbits)
                 if i == 2:
                     if n == 2:
-                        tempbits = self.timesTwo(tempbits)
+                        tempbits = u.timesTwo(tempbits)
                     if n == 3:
-                        tempbits = self.timesThree(tempbits)
+                        tempbits = u.timesThree(tempbits)
                 if i == 3:
                     if n == 0:
-                        tempbits = self.timesThree(tempbits)
+                        tempbits = u.timesThree(tempbits)
                     if n == 3:
-                        tempbits = self.timesTwo(tempbits)
+                        tempbits = u.timesTwo(tempbits)
                 state[n][i] = tempbits
         return state
-
-    def timesThree(self, byte):
-        return u.bytesToBits(u.THREEXTABLE[int(str(byte).replace('[', '').replace(']','').replace(',', '').replace(' ', ''),2)])
-
-    def timesTwo(self, bits):
-        for i in range(0,7):
-            if bits[0] == 1:
-                bits[i] = bits[i + 1]
-                bits[7] = 0
-                bits = u.byteXOR(bits, [0,0,0,1,1,0,1,1])
-            else:
-                bits[i] = bits[i + 1]
-                bits[7] = 0
-        return bits
