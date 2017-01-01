@@ -21,7 +21,6 @@ def keyExpansion(key):
                 word.append(u.bitArrayToBytes(u.byteXOR(u.bytesToBits(holder[i]), u.bytesToBits(word[i + (x - 12)]))))
         return word
 
-
 def __rotWord(word):
         temp = word[0]
         for i in range(1, 4):
